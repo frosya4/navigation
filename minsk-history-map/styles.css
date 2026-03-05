@@ -1,0 +1,658 @@
+/* ============================================================
+   Исторический Минск — Main Stylesheet
+   Light theme, premium feel
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,600&display=swap');
+
+:root {
+    /* Core Palette */
+    --cream: #fdfaf4;
+    --white: #ffffff;
+    --gold: #a36e1e;
+    --gold-light: #c9983e;
+    --gold-bg: rgba(163, 110, 30, 0.08);
+    --gold-border: rgba(163, 110, 30, 0.18);
+
+    /* Text */
+    --text-h: #111113;
+    /* headings */
+    --text-body: #2e2e33;
+    /* body copy */
+    --text-muted: #6e6e78;
+    /* secondary / labels */
+
+    /* Surface */
+    --sidebar-bg: rgba(255, 255, 255, 0.97);
+    --surface-2: rgba(246, 243, 235, 0.8);
+
+    /* Shadow & Border */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.10);
+    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.12);
+    --border: rgba(0, 0, 0, 0.06);
+
+    /* Motion */
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ── Reset ──────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--cream);
+    color: var(--text-body);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── Map ────────────────────────────────────────────────── */
+#map {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+}
+
+.leaflet-container {
+    background: #e8e0d0;
+}
+
+.map-vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(ellipse at center,
+            transparent 40%,
+            rgba(240, 234, 218, 0.55) 100%);
+}
+
+/* ── Title Card ─────────────────────────────────────────── */
+.title-overlay {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    z-index: 400;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 22px 14px;
+    box-shadow: var(--shadow-md);
+    pointer-events: none;
+    max-width: 280px;
+}
+
+.title-overlay h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+}
+
+.title-overlay p {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+/* ── Sidebar ────────────────────────────────────────────── */
+.sidebar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    bottom: 20px;
+    width: 420px;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* important for image rounding */
+    transform: translateX(0);
+    opacity: 1;
+    transition:
+        transform 0.45s var(--ease-spring),
+        opacity 0.3s ease;
+}
+
+.sidebar.hidden {
+    transform: translateX(calc(100% + 24px));
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ── Close Button ───────────────────────────────────────── */
+.close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 10;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.25s ease;
+}
+
+.close-btn:hover {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+/* ── Image Hero ─────────────────────────────────────────── */
+.image-container {
+    flex-shrink: 0;
+    height: 210px;
+    position: relative;
+    overflow: hidden;
+}
+
+#place-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.image-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+            transparent 40%,
+            rgba(255, 255, 255, 0.95) 100%);
+}
+
+.image-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f3ede0 0%, #e8ddc8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    color: rgba(163, 110, 30, 0.3);
+}
+
+/* ── Scrollable Content ─────────────────────────────────── */
+.sidebar-content {
+    flex: 1;
+    min-height: 0;
+    /* critical: allows the flex child to shrink and scroll */
+    padding: 20px 28px 16px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    gap: 0;
+}
+
+/* ── Pinned Footer ───────────────────────────────────────── */
+.sidebar-footer {
+    flex-shrink: 0;
+    padding: 16px 24px 22px;
+    background: var(--sidebar-bg);
+    border-top: 2px solid var(--gold-border);
+}
+
+/* ── Navigation Buttons (inside footer) ─────────────────── */
+.navigation-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.sidebar-content::-webkit-scrollbar {
+    width: 3px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: var(--gold-border);
+    border-radius: 999px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: var(--gold);
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.sidebar-header {
+    padding-right: 24px;
+    margin-bottom: 18px;
+}
+
+.step-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--gold-bg);
+    color: var(--gold);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    border: 1px solid var(--gold-border);
+    margin-bottom: 12px;
+}
+
+.historical-font {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+}
+
+.sidebar-header h2 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-h);
+}
+
+/* ── Description ────────────────────────────────────────── */
+.description-container {
+    margin-bottom: 22px;
+    flex-grow: 1;
+}
+
+.description-container p {
+    font-size: 0.97rem;
+    line-height: 1.75;
+    color: var(--text-body);
+    letter-spacing: 0.1px;
+}
+
+/* ── Transport Section ──────────────────────────────────── */
+.transport-container {
+    background: var(--surface-2);
+    border: 1px solid var(--gold-border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 22px;
+}
+
+.transport-container h3 {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.transport-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.transport-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    background: var(--gold-bg);
+    color: var(--gold);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.transport-details p {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text-body);
+    font-weight: 500;
+}
+
+/* ── Navigation Buttons ─────────────────────────────────── */
+.navigation-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding-top: 18px;
+    border-top: 2px solid var(--gold-border);
+    margin-top: 10px;
+}
+
+.nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 20px;
+    min-height: 54px;
+    border-radius: 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s var(--ease-out);
+    white-space: nowrap;
+}
+
+/* Secondary — Back button: clearly outlined */
+.nav-btn:not(.primary-btn) {
+    background: var(--white);
+    color: var(--text-body);
+    border: 2px solid var(--gold-border);
+    box-shadow: var(--shadow-sm);
+}
+
+.nav-btn:not(.primary-btn):hover:not(:disabled) {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: var(--gold-bg);
+    transform: translateX(-2px);
+}
+
+/* Primary — Forward button: solid gold, hard to miss */
+.nav-btn.primary-btn {
+    background: var(--gold);
+    color: #fff;
+    border: 2px solid transparent;
+    box-shadow: 0 5px 18px rgba(163, 110, 30, 0.35);
+}
+
+.nav-btn.primary-btn:hover:not(:disabled) {
+    background: var(--gold-light);
+    transform: translateX(2px);
+    box-shadow: 0 8px 24px rgba(163, 110, 30, 0.45);
+}
+
+.nav-btn:disabled {
+    opacity: 0.22;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    pointer-events: none;
+}
+
+.nav-btn i {
+    font-size: 1rem;
+    transition: transform 0.25s var(--ease-out);
+}
+
+.nav-btn.primary-btn:hover:not(:disabled) i {
+    transform: translateX(3px);
+}
+
+.nav-btn:not(.primary-btn):hover:not(:disabled) i {
+    transform: translateX(-3px);
+}
+
+
+
+
+
+/* ── Map Markers ────────────────────────────────────────── */
+.custom-marker {
+    background: transparent;
+    border: none;
+}
+
+.marker-pin {
+    width: 32px;
+    height: 32px;
+    border-radius: 50% 50% 50% 0;
+    background: var(--gold);
+    position: absolute;
+    transform: rotate(-45deg);
+    left: 50%;
+    top: 50%;
+    margin: -16px 0 0 -16px;
+    box-shadow: 0 3px 12px rgba(163, 110, 30, 0.4);
+    transition: all 0.35s var(--ease-out);
+}
+
+.marker-pin::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    margin: 6px 0 0 6px;
+    background: var(--white);
+    position: absolute;
+    border-radius: 50%;
+}
+
+.custom-marker span {
+    position: absolute;
+    width: 20px;
+    text-align: center;
+    left: 5px;
+    top: -10px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #fff;
+    z-index: 2;
+    letter-spacing: -0.5px;
+}
+
+/* Active state */
+.leaflet-marker-icon.active-marker .marker-pin {
+    background: var(--text-h);
+    transform: rotate(-45deg) scale(1.3);
+    box-shadow: 0 4px 20px rgba(163, 110, 30, 0.5);
+}
+
+.leaflet-marker-icon.active-marker .marker-pin::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    border-radius: 50% 50% 50% 0;
+    z-index: -1;
+    animation: pulse-ring 2.2s ease-out infinite;
+}
+
+.leaflet-marker-icon.active-marker .marker-pin::after {
+    background: var(--gold);
+}
+
+.leaflet-marker-icon.active-marker span {
+    color: #fff;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+
+    100% {
+        transform: scale(2.8);
+        opacity: 0;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────
+   MOBILE / TABLET  (≤ 768px)
+   Sidebar becomes a bottom sheet sliding up from the bottom
+   ───────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+    /* ── Bottom Sheet ──────────────────────────────────────── */
+    .sidebar {
+        width: 100%;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: auto;
+        height: 60vh;
+        max-height: 520px;
+        border-radius: 24px 24px 0 0;
+        border-bottom: none;
+        /* Slide up from below */
+        transform: translateY(0);
+        transition:
+            transform 0.42s var(--ease-spring),
+            opacity 0.3s ease;
+    }
+
+    .sidebar.hidden {
+        transform: translateY(105%);
+        opacity: 0.5;
+    }
+
+    /* Drag handle visual cue */
+    .sidebar::before {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: var(--gold-border);
+        border-radius: 999px;
+        z-index: 2;
+    }
+
+    /* ── Title Overlay ─────────────────────────────────────── */
+    .title-overlay {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+        text-align: center;
+        border-radius: 14px;
+        padding: 10px 16px 9px;
+        /* Centered small title */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .title-overlay h1 {
+        font-size: 1.05rem;
+    }
+
+    .title-overlay p {
+        font-size: 0.72rem;
+    }
+
+    /* ── Close button ──────────────────────────────────────── */
+    .close-btn {
+        top: 20px;
+        /* below the drag handle */
+        right: 14px;
+    }
+
+    /* ── Image — shorter on mobile ─────────────────────────── */
+    .image-container {
+        height: 130px;
+    }
+
+    /* ── Scrollable content — tighter padding ──────────────── */
+    .sidebar-content {
+        padding: 14px 18px 10px;
+    }
+
+    /* ── Typography scaling ────────────────────────────────── */
+    .sidebar-header {
+        margin-bottom: 10px;
+    }
+
+    .sidebar-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .step-badge {
+        font-size: 0.68rem;
+        margin-bottom: 8px;
+    }
+
+    .description-container p {
+        font-size: 0.9rem;
+        line-height: 1.65;
+    }
+
+    .description-container {
+        margin-bottom: 14px;
+    }
+
+    /* ── Transport section — compact ───────────────────────── */
+    .transport-container {
+        padding: 10px 12px;
+        margin-bottom: 0;
+    }
+
+    .transport-icon {
+        width: 34px;
+        height: 34px;
+        font-size: 0.95rem;
+    }
+
+    .transport-details p {
+        font-size: 0.82rem;
+    }
+
+    /* ── Pinned footer ─────────────────────────────────────── */
+    .sidebar-footer {
+        padding: 12px 16px;
+        /* respect iPhone home bar */
+        padding-bottom: max(14px, env(safe-area-inset-bottom));
+    }
+
+    /* ── Nav buttons — full width, touch-friendly ──────────── */
+    .nav-btn {
+        min-height: 50px;
+        font-size: 0.88rem;
+        padding: 14px 10px;
+    }
+
+    /* ── Leaflet controls move up to not be behind sidebar ─── */
+    .leaflet-bottom.leaflet-right {
+        bottom: calc(60vh + 20px);
+    }
+}
+
+/* ── Small phones (≤ 400px) ────────────────────────────── */
+@media (max-width: 400px) {
+    .sidebar {
+        height: 65vh;
+    }
+
+    .sidebar-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .image-container {
+        height: 100px;
+    }
+}
