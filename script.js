@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize map
-    // We set the center roughly in the middle of our route
+    // Initialize map — center on the middle of the new route
     const map = L.map('map', {
-        zoomControl: false // Move zoom control
-    }).setView([53.902, 27.559], 14);
+        zoomControl: false,
+        attributionControl: false  // скрываем атрибуцию
+    }).setView([53.904, 27.564], 14);
 
     // Add zoom control to bottom right
     L.control.zoom({
@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const placeStep = document.getElementById('place-step');
     const placeObjIcon = document.querySelector('#place-image-placeholder i');
     const placeDescription = document.getElementById('place-description');
+    const progressFill = document.getElementById('progress-bar-fill');
+    const progressLabel = document.getElementById('progress-label');
 
     // Transport section
     const transportSection = document.getElementById('transport-section');
@@ -34,49 +36,108 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
 
-    let currentActivePlaceId = null;
-    let markers = [];
+    // Title card & hints
+    const titleOverlay = document.getElementById('title-overlay');
+    const startBtn = document.getElementById('start-btn');
+    const reverseBtn = document.getElementById('reverse-btn');
+    const mapHint = document.getElementById('map-hint');
 
-    // Draw route line
-    const routeCoords = minskLocations.map(loc => loc.coords);
-    const routeLine = L.polyline(routeCoords, {
-        color: '#d4af37', // Gold accent color
-        weight: 4,
-        opacity: 0.7,
-        dashArray: '10, 10', // Dashed line for walking/transit feel
-        lineJoin: 'round'
-    }).addTo(map);
-
-    // Add markers
-    minskLocations.forEach((loc, index) => {
-        // Create custom HTML icon
-        const stepNum = index + 1;
-        const iconHtml = `
-            <div id="marker-${loc.id}" class="custom-marker">
-                <div class="marker-pin"></div>
-                <span>${stepNum}</span>
-            </div>
-        `;
-
-        const customIcon = L.divIcon({
-            html: iconHtml,
-            className: '', // Removes default leaflet icon class
-            iconSize: [30, 42],
-            iconAnchor: [15, 42]
-        });
-
-        const marker = L.marker(loc.coords, { icon: customIcon }).addTo(map);
-
-        // Add click event
-        marker.on('click', () => {
-            selectLocation(loc.id);
-        });
-
-        markers.push({ id: loc.id, marker: marker });
+    // Wire up start button → open first location
+    startBtn.addEventListener('click', () => {
+        selectLocation(minskLocations[0].id);
     });
 
-    // Fit map bounds to show the whole route initially
-    map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+    let currentActivePlaceId = null;
+    let markers = [];
+    let routeLine = null;
+    let arrowDecorator = null;
+    let isReversed = false;
+
+    // Function to draw or redraw the route
+    function drawRoute() {
+        // Clear existing layers if any
+        if (routeLine) map.removeLayer(routeLine);
+        if (arrowDecorator) map.removeLayer(arrowDecorator);
+        markers.forEach(m => map.removeLayer(m.marker));
+        markers = [];
+
+        let locationsToDraw = [...minskLocations];
+        if (isReversed) {
+            locationsToDraw.reverse();
+        }
+
+        // Draw route line — thicker and more visible
+        const routeCoords = locationsToDraw.map(loc => loc.coords);
+        routeLine = L.polyline(routeCoords, {
+            color: '#a36e1e',
+            weight: 5,
+            opacity: 0.65,
+            dashArray: '12, 8',
+            lineJoin: 'round',
+            lineCap: 'round'
+        }).addTo(map);
+
+        // Add directional arrows on the route
+        if (L.polylineDecorator) {
+            arrowDecorator = L.polylineDecorator(routeLine, {
+                patterns: [
+                    {
+                        offset: 25,
+                        repeat: 80,
+                        symbol: L.Symbol.arrowHead({
+                            pixelSize: 12,
+                            polygon: false,
+                            pathOptions: { stroke: true, weight: 3, color: '#a36e1e', opacity: 0.85 }
+                        })
+                    }
+                ]
+            }).addTo(map);
+        }
+
+        // Add markers
+        locationsToDraw.forEach((loc, index) => {
+            // Create custom HTML icon
+            const stepNum = index + 1;
+            const iconHtml = `
+                <div id="marker-${loc.id}" class="custom-marker">
+                    <div class="marker-pin"></div>
+                    <span>${stepNum}</span>
+                </div>
+            `;
+
+            const customIcon = L.divIcon({
+                html: iconHtml,
+                className: '', // Removes default leaflet icon class
+                iconSize: [30, 42],
+                iconAnchor: [15, 32] // Adjusted anchor to match the new shift in CSS
+            });
+
+            const marker = L.marker(loc.coords, { icon: customIcon }).addTo(map);
+
+            // Add click event
+            marker.on('click', () => {
+                selectLocation(loc.id);
+            });
+
+            markers.push({ id: loc.id, marker: marker });
+        });
+
+        // Fit map bounds to show the whole route initially (only on first draw or reverse)
+        map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+    }
+
+    // Initial draw
+    drawRoute();
+
+    // Wire up reverse button
+    reverseBtn.addEventListener('click', () => {
+        isReversed = !isReversed;
+        // Close sidebar if open to prevent state confusion
+        if (!sidebar.classList.contains('hidden')) {
+            closeSidebar();
+        }
+        drawRoute();
+    });
 
     // Location selection logic
     function selectLocation(id) {
@@ -90,7 +151,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!location) return;
 
         currentActivePlaceId = id;
-        const index = minskLocations.findIndex(loc => loc.id === id);
+
+        let locationsList = [...minskLocations];
+        if (isReversed) {
+            locationsList.reverse();
+        }
+        const index = locationsList.findIndex(loc => loc.id === id);
 
         // Update markers styling
         markers.forEach(m => {
@@ -105,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Update sidebar content
-        placeStep.textContent = `${index + 1} / ${minskLocations.length}`;
+        placeStep.textContent = `${index + 1} / ${locationsList.length}`;
         placeTitle.textContent = location.title;
         placeDescription.textContent = location.description;
 
@@ -127,14 +193,39 @@ document.addEventListener('DOMContentLoaded', () => {
         if (location.transport) {
             transportSection.style.display = 'block';
             transportIcon.className = `fas ${location.transport.icon}`;
-            transportText.textContent = location.transport.details;
+            // If reversed and at the very last step (originally first step), show as end of route
+            if (isReversed && index === locationsList.length - 1) {
+                transportIcon.className = 'fas fa-flag-checkered';
+                transportText.textContent = 'Конец маршрута (начало проспекта)';
+            } else if (isReversed && index < locationsList.length - 1) {
+                // When reversed, the transport info should technically point to the previous item.
+                // We fetch the transport info from the 'current' location going backwards.
+                // E.g., if we are going from 2 -> 1, the instructions are technically the reverse of going 1 -> 2.
+                // To keep things simple, we'll just say 'Пешком к следующей точке' or show the info of the NEXT step in the reversed array.
+                let nextLoc = locationsList[index + 1];
+                if (nextLoc && nextLoc.transport) {
+                    transportIcon.className = `fas ${nextLoc.transport.icon}`;
+                    // Simplistic reverse logic for text
+                    transportText.textContent = `К точке «${nextLoc.title}»`;
+                } else {
+                    transportText.textContent = `К следующей точке`;
+                }
+            } else {
+                transportText.textContent = location.transport.details;
+            }
+
         } else {
             transportSection.style.display = 'none';
         }
 
         // Update navigation buttons
         prevBtn.disabled = index === 0;
-        nextBtn.disabled = index === minskLocations.length - 1;
+        nextBtn.disabled = index === locationsList.length - 1;
+
+        // Update progress bar
+        const pct = ((index + 1) / locationsList.length) * 100;
+        progressFill.style.width = `${pct}%`;
+        progressLabel.textContent = `Остановка ${index + 1} из ${locationsList.length}`;
 
         // Open sidebar
         openSidebar();
@@ -151,8 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
             targetLat -= 0.003;
         } else {
             // Desktop: Sidebar is on the right, move point slightly right to center it in the left 60% of screen
-            // 380px sidebar on ~1200px screen is ~30%. We want point at ~35% from left.
-            targetLng += 0.006;
+            // Reduced to 0.004 to keep it closer to the visual center.
+            targetLng += 0.004;
         }
 
         map.flyTo([targetLat, targetLng], 16, {
@@ -164,10 +255,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Sidebar controls
     function openSidebar() {
         sidebar.classList.remove('hidden');
+        mapHint.classList.add('hidden');
+        titleOverlay.classList.add('sidebar-open');
     }
 
     function closeSidebar() {
         sidebar.classList.add('hidden');
+        mapHint.classList.remove('hidden');
+        titleOverlay.classList.remove('sidebar-open');
         // Remove active class from markers
         markers.forEach(m => {
             const el = document.getElementById(`marker-${m.id}`);
@@ -183,16 +278,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Navigation buttons logic
     prevBtn.addEventListener('click', () => {
-        const index = minskLocations.findIndex(loc => loc.id === currentActivePlaceId);
+        let locationsList = [...minskLocations];
+        if (isReversed) locationsList.reverse();
+        const index = locationsList.findIndex(loc => loc.id === currentActivePlaceId);
         if (index > 0) {
-            selectLocation(minskLocations[index - 1].id);
+            selectLocation(locationsList[index - 1].id);
         }
     });
 
     nextBtn.addEventListener('click', () => {
-        const index = minskLocations.findIndex(loc => loc.id === currentActivePlaceId);
-        if (index < minskLocations.length - 1) {
-            selectLocation(minskLocations[index + 1].id);
+        let locationsList = [...minskLocations];
+        if (isReversed) locationsList.reverse();
+        const index = locationsList.findIndex(loc => loc.id === currentActivePlaceId);
+        if (index < locationsList.length - 1) {
+            selectLocation(locationsList[index + 1].id);
         }
     });
 
@@ -207,15 +306,17 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
         if (sidebar.classList.contains('hidden') || !currentActivePlaceId) return;
 
-        const index = minskLocations.findIndex(loc => loc.id === currentActivePlaceId);
+        let locationsList = [...minskLocations];
+        if (isReversed) locationsList.reverse();
+        const index = locationsList.findIndex(loc => loc.id === currentActivePlaceId);
 
         if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-            if (index < minskLocations.length - 1) {
-                selectLocation(minskLocations[index + 1].id);
+            if (index < locationsList.length - 1) {
+                selectLocation(locationsList[index + 1].id);
             }
         } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
             if (index > 0) {
-                selectLocation(minskLocations[index - 1].id);
+                selectLocation(locationsList[index - 1].id);
             }
         } else if (e.key === 'Escape') {
             closeSidebar();

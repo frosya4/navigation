@@ -83,29 +83,176 @@ body {
     z-index: 400;
     background: var(--sidebar-bg);
     border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 16px 22px 14px;
+    border-radius: 20px;
+    padding: 16px 20px;
     box-shadow: var(--shadow-md);
-    pointer-events: none;
-    max-width: 280px;
+    max-width: 300px;
+    pointer-events: all;
+    /* allow button click */
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
-.title-overlay h1 {
+.title-text h1 {
     font-family: 'Playfair Display', serif;
     font-style: italic;
     font-size: 1.35rem;
     font-weight: 700;
     color: var(--gold);
-    letter-spacing: 0.3px;
     line-height: 1.2;
     margin-bottom: 4px;
 }
 
-.title-overlay p {
-    font-size: 0.78rem;
-    font-weight: 500;
+.title-text p {
+    font-size: 0.75rem;
+    font-weight: 600;
     color: var(--text-muted);
     letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+/* Start route & Reverse buttons */
+.title-buttons {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.start-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px 18px;
+    background: var(--gold);
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(163, 110, 30, 0.3);
+    transition: all 0.25s var(--ease-out);
+    letter-spacing: 0.3px;
+}
+
+.start-btn:hover {
+    background: var(--gold-light);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(163, 110, 30, 0.4);
+}
+
+.start-btn i {
+    font-size: 0.85rem;
+}
+
+.reverse-btn {
+    width: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-2);
+    color: var(--gold);
+    border: 1px solid var(--gold-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+}
+
+.reverse-btn:hover {
+    background: var(--gold-bg);
+    border-color: var(--gold);
+}
+
+.reverse-btn i {
+    transition: transform 0.3s var(--ease-spring);
+}
+
+.reverse-btn:hover i {
+    transform: rotate(180deg);
+}
+
+/* When sidebar is open, collapse the title to just the title text */
+.title-overlay.sidebar-open .title-buttons {
+    display: none;
+}
+
+/* ── Map Hint (shown when sidebar closed) ───────────────── */
+.map-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 400;
+    background: var(--sidebar-bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 10px 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-md);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    pointer-events: none;
+    animation: hint-bounce 2s ease-in-out infinite;
+    white-space: nowrap;
+}
+
+.map-hint i {
+    color: var(--gold);
+    font-size: 1rem;
+}
+
+.map-hint.hidden {
+    display: none;
+}
+
+@keyframes hint-bounce {
+
+    0%,
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    50% {
+        transform: translateX(-50%) translateY(-6px);
+    }
+}
+
+/* ── Progress Bar ────────────────────────────────────────── */
+.progress-bar-container {
+    margin-bottom: 16px;
+}
+
+.progress-bar-track {
+    height: 5px;
+    background: var(--gold-border);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 999px;
+    width: 6.67%;
+    /* 1/15 */
+    transition: width 0.5s var(--ease-out);
+}
+
+.progress-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
@@ -423,6 +570,9 @@ body {
 .custom-marker {
     background: transparent;
     border: none;
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
 .marker-pin {
@@ -434,42 +584,42 @@ body {
     transform: rotate(-45deg);
     left: 50%;
     top: 50%;
-    margin: -16px 0 0 -16px;
+    margin: -24px 0 0 -16px;
+    /* Shift up so the point is at the anchor */
     box-shadow: 0 3px 12px rgba(163, 110, 30, 0.4);
     transition: all 0.35s var(--ease-out);
 }
 
-.marker-pin::after {
-    content: '';
-    width: 20px;
-    height: 20px;
-    margin: 6px 0 0 6px;
-    background: var(--white);
-    position: absolute;
-    border-radius: 50%;
-}
-
 .custom-marker span {
     position: absolute;
-    width: 20px;
-    text-align: center;
-    left: 5px;
-    top: -10px;
-    font-size: 11px;
-    font-weight: 800;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: -8px;
+    /* Offset to center in the fat part of the pin */
+    padding-right: 1px;
+    /* Optical center adjustment */
+    font-size: 13px;
+    /* Slightly larger for readability */
+    font-weight: 700;
     color: #fff;
+    /* White text on gold pin */
     z-index: 2;
-    letter-spacing: -0.5px;
 }
 
 /* Active state */
-.leaflet-marker-icon.active-marker .marker-pin {
+.custom-marker.active-marker .marker-pin {
     background: var(--text-h);
     transform: rotate(-45deg) scale(1.3);
     box-shadow: 0 4px 20px rgba(163, 110, 30, 0.5);
 }
 
-.leaflet-marker-icon.active-marker .marker-pin::before {
+.custom-marker.active-marker .marker-pin::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -479,12 +629,10 @@ body {
     animation: pulse-ring 2.2s ease-out infinite;
 }
 
-.leaflet-marker-icon.active-marker .marker-pin::after {
-    background: var(--gold);
-}
-
-.leaflet-marker-icon.active-marker span {
+.custom-marker.active-marker span {
     color: #fff;
+    transform: translate(-50%, -50%) scale(1.1);
+    /* Text grows slightly with the active pin */
 }
 
 @keyframes pulse-ring {

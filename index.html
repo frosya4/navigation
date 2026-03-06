@@ -26,15 +26,28 @@
 <body>
     <div id="map"></div>
     <div class="map-vignette"></div>
-    <div class="noise-overlay"></div>
+
+    <!-- Map Hint: shown when no location is selected -->
+    <div class="map-hint" id="map-hint">
+        <i class="fas fa-hand-pointer"></i>
+        <span>Нажмите на точку маршрута</span>
+    </div>
 
     <!-- Sidebar / Panel for details -->
     <aside id="sidebar" class="sidebar hidden">
         <button id="close-btn" class="close-btn"><i class="fas fa-times"></i></button>
         <div class="sidebar-content">
             <div class="sidebar-header">
-                <span class="step-badge" id="place-step">1 / 7</span>
+                <span class="step-badge" id="place-step">1 / 15</span>
                 <h2 id="place-title" class="historical-font">Название места</h2>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="progress-bar-container">
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="progress-bar-fill"></div>
+                </div>
+                <span class="progress-label" id="progress-label">Остановка 1 из 15</span>
             </div>
 
             <div class="image-container">
@@ -72,14 +85,25 @@
         </div>
     </aside>
 
-    <!-- UI Overlay for Title -->
-    <div class="title-overlay">
-        <h1>Исторический Минск</h1>
-        <p>Маршрут по эпохам города</p>
+    <!-- Title Card with Start Button -->
+    <div class="title-overlay" id="title-overlay">
+        <div class="title-text">
+            <h1>Исторический Минск</h1>
+            <p>15 остановок · Проспект Независимости</p>
+        </div>
+        <div class="title-buttons">
+            <button class="start-btn" id="start-btn">
+                <i class="fas fa-play"></i> Начать маршрут
+            </button>
+            <button class="reverse-btn" id="reverse-btn" title="Изменить направление (с конца в начало)">
+                <i class="fas fa-exchange-alt"></i>
+            </button>
+        </div>
     </div>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-polylinedecorator@1.6.4/dist/leaflet.polylineDecorator.js"></script>
 
     <!-- Custom Scripts -->
     <script src="data.js"></script>
