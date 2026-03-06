@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to draw or redraw the route
     function drawRoute() {
         // Clear existing layers if any
-        if (routeLine) map.removeLayer(routeLine);
+        if (routeLine) map.removeControl(routeLine);
         if (arrowDecorator) map.removeLayer(arrowDecorator);
         markers.forEach(m => map.removeLayer(m.marker));
         markers = [];
@@ -66,35 +66,55 @@ document.addEventListener('DOMContentLoaded', () => {
             locationsToDraw.reverse();
         }
 
-        // Draw route line — thicker and more visible
-        const routeCoords = locationsToDraw.map(loc => loc.coords);
-        routeLine = L.polyline(routeCoords, {
-            color: '#a36e1e',
-            weight: 5,
-            opacity: 0.65,
-            dashArray: '12, 8',
-            lineJoin: 'round',
-            lineCap: 'round'
+        const waypoints = locationsToDraw.map(loc => L.latLng(loc.coords[0], loc.coords[1]));
+
+        // Create routing control (this replaces the straight line)
+        routeLine = L.Routing.control({
+            waypoints: waypoints,
+            router: L.Routing.osrmv1({
+                // Use the official OSM public server for foot routing:
+                serviceUrl: 'https://routing.openstreetmap.de/routed-foot/route/v1',
+                profile: 'driving' // leafy appends this, but the server is routed-foot so it yields pedestrian path
+            }),
+            lineOptions: {
+                styles: [{ color: '#a36e1e', opacity: 0.65, weight: 5, dashArray: '12, 8' }],
+                addWaypoints: false
+            },
+            createMarker: function () { return null; }, // We add our own markers below
+            fitSelectedRoutes: true,
+            show: false // Hide the instruction container
         }).addTo(map);
 
-        // Add directional arrows on the route
-        if (L.polylineDecorator) {
-            arrowDecorator = L.polylineDecorator(routeLine, {
-                patterns: [
-                    {
-                        offset: 25,
-                        repeat: 80,
-                        symbol: L.Symbol.arrowHead({
-                            pixelSize: 12,
-                            polygon: false,
-                            pathOptions: { stroke: true, weight: 3, color: '#a36e1e', opacity: 0.85 }
-                        })
-                    }
-                ]
-            }).addTo(map);
-        }
+        // Once the route is calculated and added to the map, add directional arrows
+        routeLine.on('routesfound', function (e) {
+            const routes = e.routes;
+            if (routes && routes.length > 0) {
+                const coordinates = routes[0].coordinates;
+                const pathCoords = coordinates.map(c => [c.lat, c.lng]);
 
-        // Add markers
+                const realPolyline = L.polyline(pathCoords); // Dummy polyline just for decorator
+
+                if (arrowDecorator) map.removeLayer(arrowDecorator);
+
+                if (L.polylineDecorator) {
+                    arrowDecorator = L.polylineDecorator(realPolyline, {
+                        patterns: [
+                            {
+                                offset: 25,
+                                repeat: 80,
+                                symbol: L.Symbol.arrowHead({
+                                    pixelSize: 12,
+                                    polygon: false,
+                                    pathOptions: { stroke: true, weight: 3, color: '#a36e1e', opacity: 0.85 }
+                                })
+                            }
+                        ]
+                    }).addTo(map);
+                }
+            }
+        });
+
+        // Add custom markers
         locationsToDraw.forEach((loc, index) => {
             // Create custom HTML icon
             const stepNum = index + 1;
@@ -109,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 html: iconHtml,
                 className: '', // Removes default leaflet icon class
                 iconSize: [30, 42],
-                iconAnchor: [15, 32] // Adjusted anchor to match the new shift in CSS
+                iconAnchor: [15, 32]
             });
 
             const marker = L.marker(loc.coords, { icon: customIcon }).addTo(map);
@@ -121,9 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             markers.push({ id: loc.id, marker: marker });
         });
-
-        // Fit map bounds to show the whole route initially (only on first draw or reverse)
-        map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
     }
 
     // Initial draw

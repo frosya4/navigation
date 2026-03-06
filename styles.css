@@ -619,6 +619,11 @@ body {
     box-shadow: 0 4px 20px rgba(163, 110, 30, 0.5);
 }
 
+/* Hide default Leaflet Routing Machine panel */
+.leaflet-routing-container {
+    display: none !important;
+}
+
 .custom-marker.active-marker .marker-pin::before {
     content: '';
     position: absolute;
