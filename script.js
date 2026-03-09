@@ -42,6 +42,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const reverseBtn = document.getElementById('reverse-btn');
     const mapHint = document.getElementById('map-hint');
 
+    // Scientists Modal Elements
+    const scientistsAction = document.getElementById('scientists-action');
+    const scientistsBtn = document.getElementById('scientists-btn');
+    const scientistsModal = document.getElementById('scientists-modal');
+    const closeModal = document.getElementById('close-modal');
+    const scientistsGrid = document.getElementById('scientists-grid');
+
     // Wire up start button → open first location
     startBtn.addEventListener('click', () => {
         selectLocation(minskLocations[0].id);
@@ -235,6 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
             transportSection.style.display = 'none';
         }
 
+        // Show/Hide Scientists Button
+        if (location.scientists && location.scientists.length > 0) {
+            scientistsAction.style.display = 'block';
+        } else {
+            scientistsAction.style.display = 'none';
+        }
+
         // Update navigation buttons
         prevBtn.disabled = index === 0;
         nextBtn.disabled = index === locationsList.length - 1;
@@ -346,4 +360,44 @@ document.addEventListener('DOMContentLoaded', () => {
         // Or open the first one briefly:
         // selectLocation(minskLocations[0].id);
     }, 1000);
+
+    // ── Scientists Modal Logic ──────────────────────────────
+    function openScientistsModal() {
+        const location = minskLocations.find(loc => loc.id === currentActivePlaceId);
+        if (!location || !location.scientists) return;
+
+        // Populate grid
+        scientistsGrid.innerHTML = '';
+        location.scientists.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'scientist-card';
+            card.innerHTML = `
+                <div class="scientist-image-wrapper">
+                    <img src="${s.image}" alt="${s.name}">
+                </div>
+                <div class="scientist-info">
+                    <h3>${s.name}</h3>
+                    <p class="scientist-specialty">${s.specialty}</p>
+                    <p class="scientist-bio">${s.description}</p>
+                </div>
+            `;
+            scientistsGrid.appendChild(card);
+        });
+
+        scientistsModal.classList.remove('hidden');
+    }
+
+    function closeScientistsModal() {
+        scientistsModal.classList.add('hidden');
+    }
+
+    scientistsBtn.addEventListener('click', openScientistsModal);
+    closeModal.addEventListener('click', closeScientistsModal);
+
+    // Close modal on overlay click
+    scientistsModal.addEventListener('click', (e) => {
+        if (e.target === scientistsModal) {
+            closeScientistsModal();
+        }
+    });
 });

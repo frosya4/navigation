@@ -61,6 +61,11 @@
 
             <div class="description-container">
                 <p id="place-description">Описание исторического места...</p>
+                <div id="scientists-action" style="display: none; margin-top: 20px;">
+                    <button id="scientists-btn" class="more-details-btn">
+                        <i class="fas fa-microscope"></i> Учёные Академии
+                    </button>
+                </div>
             </div>
 
             <div class="transport-container" id="transport-section">
@@ -106,6 +111,20 @@
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
     <script src="https://unpkg.com/leaflet-polylinedecorator@1.6.4/dist/leaflet.polylineDecorator.js"></script>
+
+    <!-- Scientists Modal -->
+    <div id="scientists-modal" class="modal-overlay hidden">
+        <div class="modal-container">
+            <button id="close-modal" class="close-modal-btn"><i class="fas fa-times"></i></button>
+            <div class="modal-header">
+                <h2 class="historical-font">Выдающиеся учёные</h2>
+                <p>Деятели Национальной академии наук Беларуси</p>
+            </div>
+            <div class="scientists-grid" id="scientists-grid">
+                <!-- Scientists will be injected here -->
+            </div>
+        </div>
+    </div>
 
     <!-- Custom Scripts -->
     <script src="data.js"></script>

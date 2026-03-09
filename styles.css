@@ -59,6 +59,8 @@ body {
     position: fixed;
     inset: 0;
     z-index: 1;
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .leaflet-container {
@@ -274,6 +276,8 @@ body {
     /* important for image rounding */
     transform: translateX(0);
     opacity: 1;
+    transform: translateZ(0);
+    will-change: transform, opacity;
     transition:
         transform 0.45s var(--ease-spring),
         opacity 0.3s ease;
@@ -798,14 +802,217 @@ body {
 /* ── Small phones (≤ 400px) ────────────────────────────── */
 @media (max-width: 400px) {
     .sidebar {
-        height: 65vh;
+        height: 70vh;
+    }
+}
+
+/* ── More Details Button ────────────────────────────────── */
+.more-details-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    background: var(--white);
+    color: var(--gold);
+    border: 2px solid var(--gold-border);
+    border-radius: 12px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out);
+    box-shadow: var(--shadow-sm);
+}
+
+.more-details-btn:hover {
+    background: var(--gold-bg);
+    border-color: var(--gold);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(163, 110, 30, 0.15);
+}
+
+/* ── Modal Overlay ──────────────────────────────────────── */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(17, 17, 19, 0.92);
+    /* Darker background to compensate for blur removal */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+    transform: translateZ(0);
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-container {
+    background: var(--cream);
+    width: 100%;
+    max-width: 1000px;
+    max-height: 90vh;
+    border-radius: 32px;
+    position: relative;
+    padding: 40px;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--gold-border);
+    transform: scale(1) translateZ(0);
+    will-change: transform;
+    transition: transform 0.4s var(--ease-spring);
+}
+
+.modal-overlay.hidden .modal-container {
+    transform: scale(0.9);
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+}
+
+.close-modal-btn:hover {
+    background: var(--gold);
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+.modal-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.modal-header h2 {
+    font-size: 2.2rem;
+    color: var(--gold);
+    margin-bottom: 8px;
+}
+
+.modal-header p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ── Scientists Grid ────────────────────────────────────── */
+.scientists-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+.scientist-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.scientist-image-wrapper {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    position: relative;
+    margin-bottom: 20px;
+    padding: 4px;
+    background: transparent;
+    transition: all 0.4s ease;
+}
+
+/* ── Glowing Accent ── */
+.scientist-image-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0.5;
+    transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+.scientist-card:hover .scientist-image-wrapper::before {
+    opacity: 1;
+    filter: blur(8px);
+}
+
+/* ── Additional Glow Effect for Presentation ── */
+.scientist-image-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(163, 110, 30, 0);
+    transition: all 0.5s ease;
+}
+
+.scientist-card:hover .scientist-image-wrapper::after {
+    box-shadow: 0 0 25px 10px rgba(163, 110, 30, 0.45);
+}
+
+.scientist-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid var(--white);
+    transition: transform 0.4s ease;
+}
+
+.scientist-card:hover img {
+    transform: scale(1.05);
+}
+
+.scientist-info h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    color: var(--text-h);
+    margin-bottom: 5px;
+}
+
+.scientist-specialty {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.scientist-bio {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--text-body);
+}
+
+@media (max-width: 900px) {
+    .scientists-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
     }
 
-    .sidebar-header h2 {
-        font-size: 1.1rem;
-    }
-
-    .image-container {
-        height: 100px;
+    .modal-container {
+        padding: 30px 20px;
     }
 }
