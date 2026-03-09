@@ -232,13 +232,17 @@ document.addEventListener('DOMContentLoaded', () => {
             transportSection.style.display = 'none';
         }
 
-        // Show/Hide personalities/scientists button
-        const peopleData = location.scientists || location.personalities;
+        // Show/Hide personalities/scientists/athletes button
+        const peopleData = location.scientists || location.personalities || location.athletes;
         if (peopleData && peopleData.length > 0) {
             scientistsAction.style.display = 'block';
 
             if (location.id === 15) {
                 scientistsBtn.innerHTML = '<i class="fas fa-microscope"></i> Учёные Академии';
+            } else if (location.id === 4) {
+                scientistsBtn.innerHTML = '<i class="fas fa-running"></i> Знаменитые спортсмены';
+            } else if (location.id === 3) {
+                scientistsBtn.innerHTML = '<i class="fas fa-user-graduate"></i> Личности и студенты';
             } else {
                 scientistsBtn.innerHTML = '<i class="fas fa-users"></i> Знаменитые личности';
             }
@@ -387,8 +391,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const location = minskLocations.find(loc => loc.id === currentActivePlaceId);
         if (!location) return;
 
-        const peopleData = location.scientists || location.personalities;
+        const peopleData = location.scientists || location.personalities || location.athletes;
         if (!peopleData) return;
+
+        // Dynamic Modal Header
+        const modalHeaderH2 = scientistsModal.querySelector('.modal-header h2');
+        const modalHeaderP = scientistsModal.querySelector('.modal-header p');
+
+        if (location.id === 15) {
+            modalHeaderH2.textContent = 'Выдающиеся учёные';
+            modalHeaderP.textContent = 'Деятели Национальной академии наук Беларуси';
+        } else if (location.id === 4) {
+            modalHeaderH2.textContent = 'Легендарные спортсмены';
+            modalHeaderP.textContent = 'Гордость белорусского спорта';
+        } else if (location.id === 3) {
+            modalHeaderH2.textContent = 'Личности и студенты';
+            modalHeaderP.textContent = 'Связь поколений БГЭУ';
+        } else {
+            modalHeaderH2.textContent = 'Знаменитые личности';
+            modalHeaderP.textContent = 'Известные деятели Беларуси';
+        }
 
         // Populate grid
         scientistsGrid.innerHTML = '';
