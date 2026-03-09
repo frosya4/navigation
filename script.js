@@ -56,15 +56,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentActivePlaceId = null;
     let markers = [];
-    let routeLine = null;
+    let staticRouteLine = null;
     let arrowDecorator = null;
     let isReversed = false;
 
+    // Initialize the router once
+    const router = L.Routing.osrmv1({
+        serviceUrl: 'https://routing.openstreetmap.de/routed-foot/route/v1',
+        profile: 'driving'
+    });
+
     // Function to draw or redraw the route
     function drawRoute() {
-        // Clear existing layers if any
-        if (routeLine) map.removeControl(routeLine);
-        if (arrowDecorator) map.removeLayer(arrowDecorator);
+        // Clear existing markers
         markers.forEach(m => map.removeLayer(m.marker));
         markers = [];
 
@@ -73,57 +77,48 @@ document.addEventListener('DOMContentLoaded', () => {
             locationsToDraw.reverse();
         }
 
-        const waypoints = locationsToDraw.map(loc => L.latLng(loc.coords[0], loc.coords[1]));
+        // Create waypoints for the routing line
+        const waypoints = locationsToDraw
+            .map(loc => ({ latLng: L.latLng(loc.coords[0], loc.coords[1]) }));
 
-        // Create routing control (this replaces the straight line)
-        routeLine = L.Routing.control({
-            waypoints: waypoints,
-            router: L.Routing.osrmv1({
-                // Use the official OSM public server for foot routing:
-                serviceUrl: 'https://routing.openstreetmap.de/routed-foot/route/v1',
-                profile: 'driving' // leafy appends this, but the server is routed-foot so it yields pedestrian path
-            }),
-            lineOptions: {
-                styles: [{ color: '#a36e1e', opacity: 0.65, weight: 5, dashArray: '12, 8' }],
-                addWaypoints: false
-            },
-            createMarker: function () { return null; }, // We add our own markers below
-            fitSelectedRoutes: true,
-            show: false // Hide the instruction container
-        }).addTo(map);
+        // Use ONLY the router engine to get coordinates
+        router.route(waypoints, (err, routes) => {
+            if (err || !routes || routes.length === 0) return;
 
-        // Once the route is calculated and added to the map, add directional arrows
-        routeLine.on('routesfound', function (e) {
-            const routes = e.routes;
-            if (routes && routes.length > 0) {
-                const coordinates = routes[0].coordinates;
-                const pathCoords = coordinates.map(c => [c.lat, c.lng]);
+            const coordinates = routes[0].coordinates;
+            const pathCoords = coordinates.map(c => [c.lat, c.lng]);
 
-                const realPolyline = L.polyline(pathCoords); // Dummy polyline just for decorator
+            // Create a static polyline that won't refresh on move
+            if (staticRouteLine) map.removeLayer(staticRouteLine);
+            staticRouteLine = L.polyline(pathCoords, {
+                color: '#a36e1e',
+                opacity: 0.65,
+                weight: 5,
+                dashArray: '12, 8',
+                interactive: false
+            }).addTo(map);
 
-                if (arrowDecorator) map.removeLayer(arrowDecorator);
+            if (arrowDecorator) map.removeLayer(arrowDecorator);
 
-                if (L.polylineDecorator) {
-                    arrowDecorator = L.polylineDecorator(realPolyline, {
-                        patterns: [
-                            {
-                                offset: 25,
-                                repeat: 80,
-                                symbol: L.Symbol.arrowHead({
-                                    pixelSize: 12,
-                                    polygon: false,
-                                    pathOptions: { stroke: true, weight: 3, color: '#a36e1e', opacity: 0.85 }
-                                })
-                            }
-                        ]
-                    }).addTo(map);
-                }
+            if (L.polylineDecorator) {
+                arrowDecorator = L.polylineDecorator(staticRouteLine, {
+                    patterns: [
+                        {
+                            offset: 25,
+                            repeat: 80,
+                            symbol: L.Symbol.arrowHead({
+                                pixelSize: 12,
+                                polygon: false,
+                                pathOptions: { stroke: true, weight: 3, color: '#a36e1e', opacity: 0.85 }
+                            })
+                        }
+                    ]
+                }).addTo(map);
             }
         });
 
         // Add custom markers
         locationsToDraw.forEach((loc, index) => {
-            // Create custom HTML icon
             const stepNum = index + 1;
             const iconHtml = `
                 <div id="marker-${loc.id}" class="custom-marker">
@@ -134,18 +129,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const customIcon = L.divIcon({
                 html: iconHtml,
-                className: '', // Removes default leaflet icon class
+                className: '',
                 iconSize: [30, 42],
                 iconAnchor: [15, 32]
             });
 
             const marker = L.marker(loc.coords, { icon: customIcon }).addTo(map);
-
-            // Add click event
-            marker.on('click', () => {
-                selectLocation(loc.id);
-            });
-
+            marker.on('click', () => selectLocation(loc.id));
             markers.push({ id: loc.id, marker: marker });
         });
     }
@@ -242,14 +232,23 @@ document.addEventListener('DOMContentLoaded', () => {
             transportSection.style.display = 'none';
         }
 
-        // Show/Hide Scientists Button
-        if (location.scientists && location.scientists.length > 0) {
+        // Show/Hide personalities/scientists button
+        const peopleData = location.scientists || location.personalities;
+        if (peopleData && peopleData.length > 0) {
             scientistsAction.style.display = 'block';
+
+            if (location.id === 15) {
+                scientistsBtn.innerHTML = '<i class="fas fa-microscope"></i> Учёные Академии';
+            } else {
+                scientistsBtn.innerHTML = '<i class="fas fa-users"></i> Знаменитые личности';
+            }
         } else {
             scientistsAction.style.display = 'none';
         }
 
         // Update navigation buttons
+        // For extra points, we might want to disable next/prev or skip them
+        // Let's keep them in the list so users can navigate to them
         prevBtn.disabled = index === 0;
         nextBtn.disabled = index === locationsList.length - 1;
 
@@ -302,7 +301,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentActivePlaceId = null;
 
         // Recenter map on route
-        map.flyToBounds(routeLine.getBounds(), { padding: [50, 50], duration: 1 });
+        if (staticRouteLine) {
+            map.flyToBounds(staticRouteLine.getBounds(), { padding: [50, 50], duration: 1 });
+        }
     }
 
     closeBtn.addEventListener('click', closeSidebar);
@@ -335,11 +336,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
-        if (sidebar.classList.contains('hidden') || !currentActivePlaceId) return;
+        // If modal is open, only allow Escape to close it
+        if (!scientistsModal.classList.contains('hidden')) {
+            if (e.key === 'Escape') closeScientistsModal();
+            return;
+        }
 
         let locationsList = [...minskLocations];
         if (isReversed) locationsList.reverse();
-        const index = locationsList.findIndex(loc => loc.id === currentActivePlaceId);
+
+        let index = -1;
+        if (currentActivePlaceId) {
+            index = locationsList.findIndex(loc => loc.id === currentActivePlaceId);
+        }
 
         if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
             if (index < locationsList.length - 1) {
@@ -348,9 +357,21 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
             if (index > 0) {
                 selectLocation(locationsList[index - 1].id);
+            } else if (index === -1) {
+                // If nothing selected, Left/Up can open the last point or just start from first
+                selectLocation(locationsList[0].id);
             }
         } else if (e.key === 'Escape') {
-            closeSidebar();
+            if (!sidebar.classList.contains('hidden')) {
+                closeSidebar();
+            }
+        } else if (e.key === ' ') {
+            // Spacebar: Open scientists modal if on the 15th point (Academy of Sciences)
+            // Original ID for Academy of Sciences is 15
+            if (currentActivePlaceId === 15) {
+                e.preventDefault(); // Prevent page scroll
+                openScientistsModal();
+            }
         }
     });
 
@@ -364,16 +385,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Scientists Modal Logic ──────────────────────────────
     function openScientistsModal() {
         const location = minskLocations.find(loc => loc.id === currentActivePlaceId);
-        if (!location || !location.scientists) return;
+        if (!location) return;
+
+        const peopleData = location.scientists || location.personalities;
+        if (!peopleData) return;
 
         // Populate grid
         scientistsGrid.innerHTML = '';
-        location.scientists.forEach(s => {
+        peopleData.forEach(s => {
             const card = document.createElement('div');
             card.className = 'scientist-card';
             card.innerHTML = `
                 <div class="scientist-image-wrapper">
-                    <img src="${s.image}" alt="${s.name}">
+                    <img src="${s.image}" alt="${s.name}" referrerpolicy="no-referrer">
                 </div>
                 <div class="scientist-info">
                     <h3>${s.name}</h3>
