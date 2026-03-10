@@ -109,7 +109,33 @@ const minskLocations = [
             method: "Пешком",
             icon: "fa-walking",
             details: "Выходим на Проспект Независимости — главную магистраль страны (~3 минуты)."
-        }
+        },
+        personalities: [
+            {
+                name: "Волков Валентин Викторович",
+                specialty: "Художник",
+                image: "https://upload.wikimedia.org/wikipedia/ru/a/ae/Volkov-valentin-viktorovich.jpg",
+                workName: "Минск 3 июля 1944 г.",
+                workImage: "https://libmogilev.by/virtual-exhibitions/images/picture-volkov/minsk.03-07-1944.jpg",
+                description: "Мастер тематической картины и портрета. Его полотно «Минск 3 июля 1944 г.» стало символом освобождения Беларуси и подвига народа."
+            },
+            {
+                name: "Шибнев Анатолий Демьянович",
+                specialty: "Художник",
+                image: "https://sun9-16.userapi.com/impg/Hp6zP6QW_rclC00wiGaZH5Eu3DU0Q-24iDR9mw/a6gwhYJy1AU.jpg?size=180x276&quality=96&sign=31a117338c483f92c9ca9eb4868288e8&type=album",
+                workName: "Пленных ведут (1946 г.)",
+                workImage: "https://ic.pics.livejournal.com/nornegest/76826399/327779/327779_900.jpg",
+                description: "Известный живописец, чьи работы посвящены трагическим и героическим страницам войны. Картина «Пленных ведут» — глубокое размышление о возмездии и мире."
+            },
+            {
+                name: "Савицкий Михаил Андреевич",
+                specialty: "Народный художник СССР",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUvDwDhG4vwBhuVjcFvRaOdiEnQ1RyIeotVghr_sskKUxZJLXsj-lWjf0&s=10",
+                workName: "Мадонна Биркенау (1978 г.)",
+                workImage: "https://minsknews.by/wp-content/uploads/2022/02/Madonna-Birkenau.jpeg",
+                description: "Герой Беларуси. В цикле «Цифры на сердце» он отразил ужасы концлагерей. «Мадонна Биркенау» — это гимн несокрушимому человеческому духу."
+            }
+        ]
     },
     {
         id: 6,
@@ -229,22 +255,40 @@ const minskLocations = [
         },
         personalities: [
             {
-                name: "Илья Эренбург",
-                specialty: "Публицист и писатель",
-                image: "https://24smi.org/public/media/celebrity/2020/03/27/g0rgnu6ia43i-ilia-erenburg.jpg",
-                description: "Мастер военной публицистики. Его очерки стали летописью войны, а повесть «Оттепель» дала название целой эпохе в истории литературы и общества."
-            },
-            {
-                name: "Леонид Леонов",
+                name: "Иван Мележ",
                 specialty: "Писатель-прозаик",
-                image: "https://www.kino-teatr.ru/acter/photo/7/1/237817/439575.jpg",
-                description: "Автор глубоких философских произведений. Его военные очерки, такие как «Слава России», вдохновляли бойцов на фронте и тружеников в тылу."
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZRt0IkaJTjuAT5AcwZM9jYr06yG-lyy5Mmqa84nDXQ1ZfGrSsGQAgZ6iI&s=10",
+                description: "Выдающийся белорусский прозаик, драматург. Автор цикла «Полесская хроника»."
             },
             {
-                name: "Михаил Шолохов",
-                specialty: "Лауреат Нобелевской премии",
-                image: "https://cdn-media.tass.ru/width/1020_b9261fa1/tass/m2/uploads/i/20180526/4705501.jpg",
-                description: "Выдающийся писатель, чьи работы («Судьба человека») раскрывают величие народного характера и гуманизм в самые трудные годы истории."
+                name: "Иван Шамякин",
+                specialty: "Народный писатель Беларуси",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ1WDaWqWjCb_5wfr8tDUISHVnCT5rpP6y-PbAMd_urhfgm4tMMzDlaBTI&s=10",
+                description: "Классик белорусской литературы, мастер социально-психологической и военной прозы."
+            },
+            {
+                name: "Василь Быков",
+                specialty: "Писатель, мастер военной прозы",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrVuti_7tSR50EGWtSNPrsB6BnZcG6haveRhNwE9IRsrLQApjpaBRBbLc&s=10",
+                description: "Герой Социалистического Труда, великий мастер военной прозы, автор всемирно известных произведений."
+            },
+            {
+                name: "Владимир Короткевич",
+                specialty: "Писатель, поэт и драматург",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNr6gDjxIJ8ch-jdSCbQG_pYM5KtucckaFHCGm-FJ3OZNziu67sLFZqM1u&s=10",
+                description: "Классик белорусской литературы, основоположник жанра исторического детектива."
+            },
+            {
+                name: "Нил Гилевич",
+                specialty: "Народный поэт Беларуси",
+                image: "https://minoblturism.gov.by/upload/iblock/e2e/e2ead60f86107a99f82e4a2b291a1554.jpg",
+                description: "Поэт, литературовед, общественный деятель, автор эпической поэмы «Сказ о Лысой горе»."
+            },
+            {
+                name: "Рыгор Барадулин",
+                specialty: "Народный поэт Беларуси",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTy3TtBZtGpBd_MoowddlHw9iItcx0F9wbnuLqAOB9m5nGa1GBuWvML_k2A&s=10",
+                description: "Выдающийся поэт, эссеист и переводчик, мастер белорусского слова и иронии."
             }
         ]
     },

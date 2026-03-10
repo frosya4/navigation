@@ -239,6 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (location.id === 15) {
                 scientistsBtn.innerHTML = '<i class="fas fa-microscope"></i> Учёные Академии';
+            } else if (location.id === 5) {
+                scientistsBtn.innerHTML = '<i class="fas fa-palette"></i> Мастера искусства';
             } else if (location.id === 4) {
                 scientistsBtn.innerHTML = '<i class="fas fa-running"></i> Знаменитые спортсмены';
             } else if (location.id === 3) {
@@ -370,9 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeSidebar();
             }
         } else if (e.key === ' ') {
-            // Spacebar: Open scientists modal if on the 15th point (Academy of Sciences)
-            // Original ID for Academy of Sciences is 15
-            if (currentActivePlaceId === 15) {
+            // Spacebar: Open the personalities modal if the current location has data
+            const location = minskLocations.find(loc => loc.id === currentActivePlaceId);
+            if (location && (location.scientists || location.personalities || location.athletes)) {
                 e.preventDefault(); // Prevent page scroll
                 openScientistsModal();
             }
@@ -401,6 +403,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (location.id === 15) {
             modalHeaderH2.textContent = 'Выдающиеся учёные';
             modalHeaderP.textContent = 'Деятели Национальной академии наук Беларуси';
+        } else if (location.id === 5) {
+            modalHeaderH2.textContent = 'Шедевры музея';
+            modalHeaderP.textContent = 'Знаменитые художники и их полотна';
         } else if (location.id === 4) {
             modalHeaderH2.textContent = 'Легендарные спортсмены';
             modalHeaderP.textContent = 'Гордость белорусского спорта';
@@ -417,7 +422,19 @@ document.addEventListener('DOMContentLoaded', () => {
         peopleData.forEach(s => {
             const card = document.createElement('div');
             card.className = 'scientist-card';
+
+            let workHtml = '';
+            if (s.workImage) {
+                workHtml = `
+                    <div class="painting-card-wrapper">
+                        <img src="${s.workImage}" alt="${s.workName}" class="painting-image" referrerpolicy="no-referrer">
+                        <div class="painting-caption">${s.workName}</div>
+                    </div>
+                `;
+            }
+
             card.innerHTML = `
+                ${workHtml}
                 <div class="scientist-image-wrapper">
                     <img src="${s.image}" alt="${s.name}" referrerpolicy="no-referrer">
                 </div>
