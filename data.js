@@ -124,7 +124,7 @@ const minskLocations = [
                 specialty: "Художник",
                 image: "https://sun9-16.userapi.com/impg/Hp6zP6QW_rclC00wiGaZH5Eu3DU0Q-24iDR9mw/a6gwhYJy1AU.jpg?size=180x276&quality=96&sign=31a117338c483f92c9ca9eb4868288e8&type=album",
                 workName: "Пленных ведут (1946 г.)",
-                workImage: "https://ic.pics.livejournal.com/nornegest/76826399/327779/327779_900.jpg",
+                workImage: "https://sun9-3.userapi.com/impg/8XGPest58kyGGavwIl_eftHuaKvHGMiV_B8yQw/t9zXLRE3Iws.jpg?size=1876x1210&quality=96&sign=255f9b554f964bfa7b07b18ceae32b07&type=album",
                 description: "Известный живописец, чьи работы посвящены трагическим и героическим страницам войны. Картина «Пленных ведут» — глубокое размышление о возмездии и мире."
             },
             {
